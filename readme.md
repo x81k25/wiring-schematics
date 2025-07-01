@@ -200,11 +200,78 @@ docker-compose run --rm flyway npm run migrate
 docker-compose run --rm flyway npm run migrate:info
 ```
 
+## CI/CD Integration
+
+### GitHub Actions
+
+The repository includes a GitHub Actions workflow that:
+- Builds Docker images on push to `dev` branch
+- Builds on pull requests to `stg` and `main` branches
+- Tags images with SHA versioning (e.g., `dev-20250701-abc123`)
+- Tests migrations against a temporary PostgreSQL container
+- Pushes images to GitHub Container Registry (ghcr.io)
+
+### Docker Image
+
+Pre-built images are available at:
+```
+ghcr.io/x81k25/wiring-schematics:dev
+ghcr.io/x81k25/wiring-schematics:sha-<commit>
+ghcr.io/x81k25/wiring-schematics:<branch>-<date>-<sha>
+```
+
+## Kubernetes Deployment
+
+### Using the Migration Script
+
+The `run-migration.sh` script supports both local (.env file) and Kubernetes (environment variables) deployments:
+
+```bash
+# With .env file (local development)
+./run-migration.sh info
+
+# With environment variables (Kubernetes)
+export FLYWAY_PGSQL_HOST=postgres-service
+export FLYWAY_PGSQL_PORT=5432
+export FLYWAY_PGSQL_DATABASE=mydb
+export FLYWAY_PGSQL_USERNAME=user
+export FLYWAY_PGSQL_PASSWORD=pass
+./run-migration.sh migrate
+```
+
+### Kubernetes Example
+
+See `k8s-example.yaml` for a complete example using:
+- ConfigMap for database connection settings
+- Secret for credentials
+- Job for running migrations
+
+## Project Structure Update
+
+```
+.
+├── migrations/              # SQL migration files
+│   ├── V1__Drop_test_schemas.sql
+│   ├── V2__Create_users_table.sql
+│   └── V3__Drop_users_table.sql
+├── .github/
+│   └── workflows/
+│       └── docker-build.yml # CI/CD pipeline
+├── flyway.conf.js          # Flyway configuration (deprecated)
+├── run-migration.sh        # Migration runner script
+├── k8s-example.yaml        # Kubernetes deployment example
+├── Dockerfile              # Simple Flyway image
+├── package.json            # Node.js dependencies
+├── .env                    # Local environment (not in git)
+└── .gitignore             # Git ignore patterns
+```
+
 ## Additional Resources
 
 - [Flyway Documentation](https://flywaydb.org/documentation/)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
 - [SQL Migration Best Practices](https://flywaydb.org/documentation/bestpractices)
+- [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
 
 ## License
 

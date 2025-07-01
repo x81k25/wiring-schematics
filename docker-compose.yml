@@ -1,8 +1,9 @@
 version: '3.8'
 
 services:
-  flyway:
+  wst-flyway:
     build: .
+    image: wst-flyway:latest
     environment:
       - FLYWAY_PGSQL_HOST=${FLYWAY_PGSQL_HOST}
       - FLYWAY_PGSQL_PORT=${FLYWAY_PGSQL_PORT}
@@ -17,9 +18,9 @@ services:
     command: npm run migrate:info
 
   # Example commands:
-  # docker-compose run --rm flyway npm run migrate
-  # docker-compose run --rm flyway npm run migrate:info
-  # docker-compose run --rm flyway npm run migrate:validate
+  # docker-compose run --rm wst-flyway npm run migrate
+  # docker-compose run --rm wst-flyway npm run migrate:info
+  # docker-compose run --rm wst-flyway npm run migrate:validate
 
 networks:
   db-network:

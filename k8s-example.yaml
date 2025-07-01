@@ -2,7 +2,7 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: flyway-config
+  name: wst-flyway-config
 data:
   FLYWAY_PGSQL_HOST: "postgres-service"
   FLYWAY_PGSQL_PORT: "5432"
@@ -22,18 +22,18 @@ stringData:
 apiVersion: batch/v1
 kind: Job
 metadata:
-  name: flyway-migrate
+  name: wst-flyway-migrate
 spec:
   template:
     spec:
       restartPolicy: Never
       containers:
-      - name: flyway
-        image: ghcr.io/x81k25/wiring-schematics:dev
+      - name: wst-flyway
+        image: ghcr.io/wst-flyway:dev
         command: ["flyway", "migrate"]
         envFrom:
         - configMapRef:
-            name: flyway-config
+            name: wst-flyway-config
         - secretRef:
             name: postgres-credentials
         env:

@@ -1,0 +1,26 @@
+version: '3.8'
+
+services:
+  flyway:
+    build: .
+    environment:
+      - FLYWAY_PGSQL_HOST=${FLYWAY_PGSQL_HOST}
+      - FLYWAY_PGSQL_PORT=${FLYWAY_PGSQL_PORT}
+      - FLYWAY_PGSQL_DATABASE=${FLYWAY_PGSQL_DATABASE}
+      - FLYWAY_PGSQL_USERNAME=${FLYWAY_PGSQL_USERNAME}
+      - FLYWAY_PGSQL_PASSWORD=${FLYWAY_PGSQL_PASSWORD}
+    volumes:
+      # Mount migrations directory for development
+      - ./migrations:/app/migrations:ro
+    networks:
+      - db-network
+    command: npm run migrate:info
+
+  # Example commands:
+  # docker-compose run --rm flyway npm run migrate
+  # docker-compose run --rm flyway npm run migrate:info
+  # docker-compose run --rm flyway npm run migrate:validate
+
+networks:
+  db-network:
+    driver: bridge

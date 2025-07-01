@@ -1,0 +1,26 @@
+{
+  "name": "wirings-schematics",
+  "version": "1.0.0",
+  "description": "## Purpose",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "migrate": "flyway -c flyway.conf.js migrate",
+    "migrate:clean": "flyway -c flyway.conf.js clean",
+    "migrate:info": "flyway -c flyway.conf.js info",
+    "migrate:validate": "flyway -c flyway.conf.js validate",
+    "migrate:baseline": "flyway -c flyway.conf.js baseline",
+    "migrate:repair": "flyway -c flyway.conf.js repair"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "dotenv": "^17.0.0",
+    "node-flywaydb": "^3.0.7",
+    "prisma": "^6.10.1"
+  },
+  "dependencies": {
+    "@prisma/client": "^6.10.1"
+  }
+}

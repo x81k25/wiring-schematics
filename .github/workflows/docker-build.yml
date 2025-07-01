@@ -93,7 +93,7 @@ jobs:
             -e FLYWAY_PASSWORD="postgres" \
             -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
             -v "${{ github.workspace }}/migrations:/flyway/sql:ro" \
-            flyway/flyway:9.22-alpine \
+            flyway/flyway:11.10.0-alpine \
             migrate
 
       - name: Validate migrations
@@ -105,5 +105,5 @@ jobs:
             -e FLYWAY_PASSWORD="postgres" \
             -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
             -v "${{ github.workspace }}/migrations:/flyway/sql:ro" \
-            flyway/flyway:9.22-alpine \
+            flyway/flyway:11.10.0-alpine \
             validate

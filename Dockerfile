@@ -1,5 +1,5 @@
 # Simple Dockerfile for running migrations
-FROM flyway/flyway:9.22-alpine
+FROM flyway/flyway:11.10.0-alpine
 
 # Copy migrations
 COPY migrations /flyway/sql/

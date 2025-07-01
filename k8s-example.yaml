@@ -29,7 +29,7 @@ spec:
       restartPolicy: Never
       containers:
       - name: wst-flyway
-        image: ghcr.io/wst-flyway:dev
+        image: ghcr.io/x81k25/wst-flyway:dev
         command: ["flyway", "migrate"]
         envFrom:
         - configMapRef:

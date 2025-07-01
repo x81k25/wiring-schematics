@@ -11,7 +11,7 @@ on:
 
 env:
   REGISTRY: ghcr.io
-  IMAGE_NAME: wst-flyway
+  IMAGE_NAME: ${{ github.repository_owner }}/wst-flyway
 
 jobs:
   build-and-push:

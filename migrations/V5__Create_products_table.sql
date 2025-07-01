@@ -1,6 +1,4 @@
--- Create products table in test database
-\c test;
-
+-- Create products table in public schema
 CREATE TABLE IF NOT EXISTS products (
     id SERIAL PRIMARY KEY,
     name VARCHAR(255) NOT NULL,

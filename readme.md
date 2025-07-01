@@ -6,6 +6,19 @@ This repository manages database schema migrations for PostgreSQL using Flyway. 
 
 ## Quick Start
 
+### Recommended Approach (Docker)
+```bash
+# Check migration status
+./run-migration.sh info
+
+# Run pending migrations
+./run-migration.sh migrate
+
+# Validate migrations
+./run-migration.sh validate
+```
+
+### Legacy Approach (requires local Flyway)
 ```bash
 # Install dependencies
 npm install
@@ -24,11 +37,24 @@ npm run migrate:validate
 
 ```
 .
-├── migrations/           # SQL migration files
-├── flyway.conf.js       # Flyway configuration
-├── package.json         # Node.js dependencies and scripts
-├── .env                 # Database connection (not in git)
-└── .gitignore          # Git ignore patterns
+├── migrations/              # SQL migration files
+│   ├── V1__Drop_test_schemas.sql
+│   ├── V2__Create_users_table.sql
+│   ├── V3__Drop_users_table.sql
+│   ├── V4__Create_test_database.sql
+│   └── V5__Create_products_table.sql
+├── .github/
+│   └── workflows/
+│       └── docker-build.yml # CI/CD pipeline
+├── flyway/                  # Flyway command-line tools
+├── flyway.conf.js          # Flyway configuration (legacy)
+├── run-migration.sh        # Migration runner script
+├── k8s-example.yaml        # Kubernetes deployment example
+├── Dockerfile              # Docker image for Flyway
+├── docker-compose.yml      # Docker Compose configuration
+├── package.json            # Node.js dependencies and scripts
+├── .env                    # Database connection (not in git)
+└── .gitignore             # Git ignore patterns
 ```
 
 ## Configuration
@@ -90,6 +116,14 @@ CREATE INDEX idx_users_email ON users(email);
 
 ## Available Commands
 
+### Migration Script (Recommended)
+| Command | Description |
+|---------|-------------|
+| `./run-migration.sh info` | Show migration status and history |
+| `./run-migration.sh migrate` | Apply pending migrations |
+| `./run-migration.sh validate` | Validate applied migrations |
+
+### Legacy npm Scripts
 | Command | Description |
 |---------|-------------|
 | `npm run migrate` | Apply pending migrations |
@@ -102,10 +136,11 @@ CREATE INDEX idx_users_email ON users(email);
 ## Development Workflow
 
 1. **Create Migration**: Add new SQL file to `migrations/`
-2. **Check Status**: Run `npm run migrate:info`
-3. **Test Locally**: Apply with `npm run migrate`
-4. **Validate**: Run `npm run migrate:validate`
+2. **Check Status**: Run `./run-migration.sh info`
+3. **Test Locally**: Apply with `./run-migration.sh migrate`
+4. **Validate**: Run `./run-migration.sh validate`
 5. **Commit**: Push migration file to version control
+6. **CI/CD**: GitHub Actions will automatically test and build Docker images
 
 ## Best Practices
 
@@ -190,14 +225,14 @@ docker run --rm --env-file .env flyway-migrations npm run migrate:validate
 ### Using Docker Compose
 
 ```bash
-# Check migration status (default command)
-docker-compose run --rm flyway
+# Check migration status
+docker-compose run --rm flyway info
 
 # Run migrations
-docker-compose run --rm flyway npm run migrate
+docker-compose run --rm flyway migrate
 
-# Run any other command
-docker-compose run --rm flyway npm run migrate:info
+# Validate migrations
+docker-compose run --rm flyway validate
 ```
 
 ## CI/CD Integration
@@ -215,9 +250,10 @@ The repository includes a GitHub Actions workflow that:
 
 Pre-built images are available at:
 ```
-ghcr.io/x81k25/wiring-schematics:dev
-ghcr.io/x81k25/wiring-schematics:sha-<commit>
-ghcr.io/x81k25/wiring-schematics:<branch>-<date>-<sha>
+ghcr.io/x81k25/wst-flyway:dev
+ghcr.io/x81k25/wst-flyway:main
+ghcr.io/x81k25/wst-flyway:stg
+ghcr.io/x81k25/wst-flyway:<commit-sha>
 ```
 
 ## Kubernetes Deployment
@@ -245,26 +281,6 @@ See `k8s-example.yaml` for a complete example using:
 - ConfigMap for database connection settings
 - Secret for credentials
 - Job for running migrations
-
-## Project Structure Update
-
-```
-.
-├── migrations/              # SQL migration files
-│   ├── V1__Drop_test_schemas.sql
-│   ├── V2__Create_users_table.sql
-│   └── V3__Drop_users_table.sql
-├── .github/
-│   └── workflows/
-│       └── docker-build.yml # CI/CD pipeline
-├── flyway.conf.js          # Flyway configuration (deprecated)
-├── run-migration.sh        # Migration runner script
-├── k8s-example.yaml        # Kubernetes deployment example
-├── Dockerfile              # Simple Flyway image
-├── package.json            # Node.js dependencies
-├── .env                    # Local environment (not in git)
-└── .gitignore             # Git ignore patterns
-```
 
 ## Additional Resources
 

@@ -45,15 +45,8 @@ jobs:
             type=ref,event=branch
             # PR number (e.g., pr-123)
             type=ref,event=pr
-            # Git short SHA (e.g., sha-a1b2c3d)
-            type=sha,prefix=sha-
-            # Branch + timestamp + SHA (e.g., dev-20240701-a1b2c3d)
-            type=raw,value={{branch}}-{{date 'YYYYMMDD'}}-{{sha}},enable=${{ github.event_name == 'push' }}
-            # Latest tag for main branch
-            type=raw,value=latest,enable={{is_default_branch}}
-            # Semantic versions (if tagged)
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+            # 8-character SHA only
+            type=sha,format=short
 
       - name: Build and push Docker image
         uses: docker/build-push-action@v5

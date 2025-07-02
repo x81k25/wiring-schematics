@@ -27,4 +27,4 @@ BEGIN
 END $$;
 
 -- add comment on column
-COMMENT ON COLUMN training.reviewed IS "denotes whether or not element had been reviewed; determines inclusion into training data set"
+COMMENT ON COLUMN atp.training.reviewed IS 'denotes whether or not element had been reviewed; determines inclusion into training data set';

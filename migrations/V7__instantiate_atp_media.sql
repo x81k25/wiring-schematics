@@ -77,9 +77,6 @@ END $$;
 -- table creation statement
 --------------------------------------------------------------------------------
 
--- create the primary media table
-DROP TABLE IF EXISTS media;
-
 CREATE TABLE IF NOT EXISTS media (
     -- identifier column
     hash CHAR(40) PRIMARY KEY CHECK (hash ~ '^[a-f0-9]+$' AND length(hash) = 40),

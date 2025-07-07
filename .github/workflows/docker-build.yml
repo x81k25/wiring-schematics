@@ -15,7 +15,7 @@ jobs:
   build-test-push:
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
       packages: write
       
     services:
@@ -104,3 +104,62 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
+
+      - name: Install tbls and PostgreSQL client
+        run: |
+          # Install PostgreSQL client for debugging
+          sudo apt-get update
+          sudo apt-get install -y postgresql-client
+          
+          # Install tbls
+          curl -L -o tbls.tar.gz https://github.com/k1LoW/tbls/releases/download/v1.77.0/tbls_v1.77.0_linux_amd64.tar.gz
+          tar -xzf tbls.tar.gz
+          sudo mv tbls /usr/local/bin/
+          rm tbls.tar.gz
+
+      - name: Generate database documentation
+        run: |
+          # Debug: Check database connection and schema
+          echo "Checking database connection..."
+          psql -h localhost -U postgres -d test_db -c "SELECT version();"
+          echo "Checking for atp schema..."
+          psql -h localhost -U postgres -d test_db -c "SELECT schema_name FROM information_schema.schemata WHERE schema_name = 'atp';"
+          echo "Checking tables in atp schema..."
+          psql -h localhost -U postgres -d test_db -c "SELECT table_name FROM information_schema.tables WHERE table_schema = 'atp';"
+          
+          # Generate documentation from test database (migrations already applied)
+          echo "Generating documentation with tbls..."
+          TBLS_DSN="postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable" \
+          tbls doc
+          
+          # Debug: Check what files were generated in current directory
+          echo "Files in current directory:"
+          ls -la
+          echo "Files in dbdoc directory (if exists):"
+          ls -la dbdoc/ || echo "dbdoc directory not found"
+          echo "Files in docs directory:"
+          ls -la docs/
+          
+          # Move generated files to docs directory if they were created in dbdoc
+          if [ -d "dbdoc" ]; then
+            echo "Moving files from dbdoc/ to docs/"
+            mv dbdoc/* docs/
+            rmdir dbdoc
+          fi
+          
+          echo "Final files in docs directory:"
+          ls -la docs/
+        env:
+          TBLS_DSN: postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable
+          PGPASSWORD: postgres
+
+      - name: Commit documentation changes
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add docs/
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: update database schema documentation [skip ci]"
+            git push
+          fi

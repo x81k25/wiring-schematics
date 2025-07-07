@@ -132,8 +132,22 @@ jobs:
           TBLS_DSN="postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable" \
           tbls doc
           
-          # Debug: Check what files were generated
+          # Debug: Check what files were generated in current directory
+          echo "Files in current directory:"
+          ls -la
+          echo "Files in dbdoc directory (if exists):"
+          ls -la dbdoc/ || echo "dbdoc directory not found"
           echo "Files in docs directory:"
+          ls -la docs/
+          
+          # Move generated files to docs directory if they were created in dbdoc
+          if [ -d "dbdoc" ]; then
+            echo "Moving files from dbdoc/ to docs/"
+            mv dbdoc/* docs/
+            rmdir dbdoc
+          fi
+          
+          echo "Final files in docs directory:"
           ls -la docs/
         env:
           TBLS_DSN: postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable

@@ -87,34 +87,6 @@ jobs:
             flyway-migrations:test \
             validate
 
-      - name: Install tbls
-        run: |
-          curl -L -o tbls.tar.gz https://github.com/k1LoW/tbls/releases/download/v1.77.0/tbls_v1.77.0_linux_amd64.tar.gz
-          tar -xzf tbls.tar.gz
-          sudo mv tbls /usr/local/bin/
-          rm tbls.tar.gz
-
-      - name: Generate database documentation
-        run: |
-          # Wait for postgres to be ready
-          sleep 5
-          # Generate documentation from test database
-          TBLS_DSN="postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable" \
-          tbls doc
-        env:
-          TBLS_DSN: postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable
-
-      - name: Commit documentation changes
-        if: github.ref == 'refs/heads/dev'
-        run: |
-          git config --local user.email "actions@github.com"
-          git config --local user.name "GitHub Actions"
-          git add docs/
-          if ! git diff --cached --quiet; then
-            git commit -m "docs: update database schema documentation [skip ci]"
-            git push
-          fi
-
       - name: Log in to GitHub Container Registry
         if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
@@ -132,3 +104,29 @@ jobs:
           tags: ${{ steps.meta.outputs.tags }}
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
+
+      - name: Install tbls
+        run: |
+          curl -L -o tbls.tar.gz https://github.com/k1LoW/tbls/releases/download/v1.77.0/tbls_v1.77.0_linux_amd64.tar.gz
+          tar -xzf tbls.tar.gz
+          sudo mv tbls /usr/local/bin/
+          rm tbls.tar.gz
+
+      - name: Generate database documentation
+        run: |
+          # Generate documentation from test database (migrations already applied)
+          TBLS_DSN="postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable" \
+          tbls doc
+        env:
+          TBLS_DSN: postgres://postgres:postgres@localhost:5432/test_db?sslmode=disable
+
+      - name: Commit documentation changes
+        if: github.ref == 'refs/heads/dev'
+        run: |
+          git config --local user.email "actions@github.com"
+          git config --local user.name "GitHub Actions"
+          git add docs/
+          if ! git diff --cached --quiet; then
+            git commit -m "docs: update database schema documentation [skip ci]"
+            git push
+          fi

@@ -2,42 +2,44 @@
 
 ## Description
 
+stores training data to be ingested by reel-driver
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| imdb_id | varchar(10) |  | false |  |  |  |
-| tmdb_id | integer |  | true |  |  |  |
-| label | atp.label_type |  | false |  |  |  |
-| human_labeled | boolean | false | false |  |  |  |
-| anomalous | boolean | false | false |  |  |  |
-| media_type | atp.media_type |  | false |  |  |  |
-| media_title | varchar(255) |  | false |  |  |  |
-| season | smallint |  | true |  |  |  |
-| episode | smallint |  | true |  |  |  |
-| release_year | smallint |  | false |  |  |  |
-| budget | bigint |  | true |  |  |  |
-| revenue | bigint |  | true |  |  |  |
-| runtime | integer |  | true |  |  |  |
-| origin_country | character(2)[] |  | true |  |  |  |
-| production_companies | varchar(255)[] |  | true |  |  |  |
-| production_countries | character(2)[] |  | true |  |  |  |
-| production_status | varchar(25) |  | true |  |  |  |
-| original_language | character(2) |  | true |  |  |  |
-| spoken_languages | character(2)[] |  | true |  |  |  |
-| genre | varchar(20)[] |  | true |  |  |  |
-| original_media_title | varchar(255) |  | true |  |  |  |
-| tagline | varchar(255) |  | true |  |  |  |
-| overview | text |  | true |  |  |  |
-| tmdb_rating | numeric(5,3) |  | true |  |  |  |
-| tmdb_votes | integer |  | true |  |  |  |
-| rt_score | integer |  | true |  |  |  |
-| metascore | integer |  | true |  |  |  |
-| imdb_rating | numeric(4,1) |  | true |  |  |  |
-| imdb_votes | integer |  | true |  |  |  |
-| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
-| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
-| reviewed | boolean | false | true |  |  | denotes whether or not element had been reviewed; determines inclusion into training data set |
+| imdb_id | varchar(10) |  | false |  |  | from TMDB; IMDB identifier for media item, and the primary key for this column |
+| tmdb_id | integer |  | true |  |  | from TMDB; identifier for themoviedb.org API |
+| label | atp.label_type |  | false |  |  | training label enum value for model ingestion |
+| human_labeled | boolean | false | false |  |  | flag value that indicates a user change of the label value |
+| anomalous | boolean | false | false |  |  | user set flag for media items frequently appear as false postives or false negatvies in model results, but have been verified to be correct |
+| media_type | atp.media_type |  | false |  |  | either movie, tv_shows, or tv_season |
+| media_title | varchar(255) |  | false |  |  | either movie or tv show title |
+| season | smallint |  | true |  |  | media season if tv show or tv season; null for movies |
+| episode | smallint |  | true |  |  | episode number within season for tv show, otherwise null |
+| release_year | smallint |  | false |  |  | year the movie was released or the year of the first season of a tv show |
+| budget | bigint |  | true |  |  | from TMDB; production budget of media item |
+| revenue | bigint |  | true |  |  | from TMDB; current revenue of media item |
+| runtime | integer |  | true |  |  | from TMDB; runtime in minutes of media item |
+| origin_country | character(2)[] |  | true |  |  | from TMDB; primary country of production in iso_3166_1 format |
+| production_companies | varchar(255)[] |  | true |  |  | from TMDB; array of production companies |
+| production_countries | character(2)[] |  | true |  |  | from TMDB; array of countries where media item was produced in iso_3166_1 format |
+| production_status | varchar(25) |  | true |  |  | from TMDB; current production status of media item |
+| original_language | character(2) |  | true |  |  | from TMDB; primary language of media item in ISO 639 format |
+| spoken_languages | character(2)[] |  | true |  |  | from TMDB; array of languages available encoded in ISO 639 format |
+| genre | varchar(20)[] |  | true |  |  | from TMDB; array of genres associated with the movie |
+| original_media_title | varchar(255) |  | true |  |  | from TMDB; original title of media item |
+| tagline | varchar(255) |  | true |  |  | from TMDB; tagline for the media item |
+| overview | text |  | true |  |  | from TMDB; brief plot synopsis of media item |
+| tmdb_rating | numeric(5,3) |  | true |  |  | from TMDB; rating submitted by TMDB users out of 10 |
+| tmdb_votes | integer |  | true |  |  | from TMDB; number of ratings by TMDB users |
+| rt_score | integer |  | true |  |  | Rotten Tomatoes score |
+| metascore | integer |  | true |  |  | MetaCritic score |
+| imdb_rating | numeric(4,1) |  | true |  |  | IMDB rating out of 100 |
+| imdb_votes | integer |  | true |  |  | number of votes on IMDB |
+| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp for initial database creation of item |
+| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp of last database alteration of item |
+| reviewed | boolean | false | true |  |  | deterines if training label has been confirmed as accurate |
 
 ## Constraints
 

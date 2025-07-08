@@ -2,55 +2,57 @@
 
 ## Description
 
+stores media data for movies, tv shows, and tv seasons
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
-| hash | character(40) |  | false |  |  |  |
-| media_type | atp.media_type |  | false |  |  |  |
-| media_title | varchar(255) |  | true |  |  |  |
-| season | integer |  | true |  |  |  |
-| episode | integer |  | true |  |  |  |
-| release_year | integer |  | true |  |  |  |
-| pipeline_status | atp.pipeline_status | 'ingested'::atp.pipeline_status | false |  |  |  |
-| error_status | boolean | false | false |  |  |  |
-| error_condition | text |  | true |  |  |  |
-| rejection_status | atp.rejection_status | 'unfiltered'::atp.rejection_status | false |  |  |  |
-| rejection_reason | text |  | true |  |  |  |
-| parent_path | text |  | true |  |  |  |
-| target_path | text |  | true |  |  |  |
-| original_title | text |  | false |  |  |  |
-| original_path | text |  | true |  |  |  |
-| original_link | text |  | true |  |  |  |
-| rss_source | atp.rss_source |  | true |  |  |  |
-| uploader | varchar(25) |  | true |  |  |  |
-| imdb_id | varchar(10) |  | true |  |  |  |
-| tmdb_id | integer |  | true |  |  |  |
-| budget | bigint |  | true |  |  |  |
-| revenue | bigint |  | true |  |  |  |
-| runtime | integer |  | true |  |  |  |
-| origin_country | character(2)[] |  | true |  |  |  |
-| production_companies | varchar(255)[] |  | true |  |  |  |
-| production_countries | character(2)[] |  | true |  |  |  |
-| production_status | varchar(25) |  | true |  |  |  |
-| original_language | character(2) |  | true |  |  |  |
-| spoken_languages | character(2)[] |  | true |  |  |  |
-| genre | varchar(20)[] |  | true |  |  |  |
-| original_media_title | varchar(255) |  | true |  |  |  |
-| tagline | varchar(255) |  | true |  |  |  |
-| overview | text |  | true |  |  |  |
-| tmdb_rating | numeric(5,3) |  | true |  |  |  |
-| tmdb_votes | integer |  | true |  |  |  |
-| rt_score | integer |  | true |  |  |  |
-| metascore | integer |  | true |  |  |  |
-| imdb_rating | numeric(4,1) |  | true |  |  |  |
-| imdb_votes | integer |  | true |  |  |  |
-| resolution | varchar(10) |  | true |  |  |  |
-| video_codec | varchar(10) |  | true |  |  |  |
-| upload_type | varchar(10) |  | true |  |  |  |
-| audio_codec | varchar(10) |  | true |  |  |  |
-| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
-| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
+| hash | character(40) |  | false |  |  | primary key; unique identifier; and primary element for interaction with transmission |
+| media_type | atp.media_type |  | false |  |  | either movie, tv_shows, or tv_season |
+| media_title | varchar(255) |  | true |  |  | either movie or tv show title |
+| season | integer |  | true |  |  | media season if tv show or tv season; null for movies |
+| episode | integer |  | true |  |  | episode number within season for tv show, otherwise null |
+| release_year | integer |  | true |  |  | year the movie was released or the year of the first season of a tv show |
+| pipeline_status | atp.pipeline_status | 'ingested'::atp.pipeline_status | false |  |  | status within the automatic transmission pipeline |
+| error_status | boolean | false | false |  |  | boolean value documenting errors occurring during pipeline |
+| error_condition | text |  | true |  |  | details on error status |
+| rejection_status | atp.rejection_status | 'unfiltered'::atp.rejection_status | false |  |  | rejection status based on filters within filter-parameters.json |
+| rejection_reason | text |  | true |  |  | details on which filter flags were tagged, if rejection was caused |
+| parent_path | text |  | true |  |  | parent dir of media library location for item |
+| target_path | text |  | true |  |  | file or dir path for media library location |
+| original_title | text |  | false |  |  | raw item title string value; used for parsing other field values |
+| original_path | text |  | true |  |  | original path of item within media-cache |
+| original_link | text |  | true |  |  | may contain either the direct download link or the magnet link |
+| rss_source | atp.rss_source |  | true |  |  | source of rss feed for item ingestion, if any |
+| uploader | varchar(25) |  | true |  |  | uploading entity of the media item |
+| imdb_id | varchar(10) |  | true |  |  | from TMDB; IMDB identifier for media item |
+| tmdb_id | integer |  | true |  |  | from TMDB; identifier for themoviedb.org API |
+| budget | bigint |  | true |  |  | from TMDB; production budget of media item |
+| revenue | bigint |  | true |  |  | from TMDB; current revenue of media item |
+| runtime | integer |  | true |  |  | from TMDB; runtime in minutes of media item |
+| origin_country | character(2)[] |  | true |  |  | from TMDB; primary country of production in iso_3166_1 format |
+| production_companies | varchar(255)[] |  | true |  |  | from TMDB; array of production companies |
+| production_countries | character(2)[] |  | true |  |  | from TMDB; array of countries where media item was produced in iso_3166_1 format |
+| production_status | varchar(25) |  | true |  |  | from TMDB; current production status of media item |
+| original_language | character(2) |  | true |  |  | from TMDB; primary language of media item in ISO 639 format |
+| spoken_languages | character(2)[] |  | true |  |  | from TMDB; array of languages available encoded in ISO 639 format |
+| genre | varchar(20)[] |  | true |  |  | from TMDB; array of genres associated with the movie |
+| original_media_title | varchar(255) |  | true |  |  | from TMDB; original title of media item |
+| tagline | varchar(255) |  | true |  |  | from TMDB; tagline for the media item |
+| overview | text |  | true |  |  | from TMDB; brief plot synopsis of media item |
+| tmdb_rating | numeric(5,3) |  | true |  |  | from TMDB; rating submitted by TMDB users out of 10 |
+| tmdb_votes | integer |  | true |  |  | from TMDB; number of ratings by TMDB users |
+| rt_score | integer |  | true |  |  | from OMDb; Rotten Tomatoes score out of 100 |
+| metascore | integer |  | true |  |  | from OMDb; MetaCritic score out of 100 |
+| imdb_rating | numeric(4,1) |  | true |  |  | from OMDb; IMDB rating out of 100 |
+| imdb_votes | integer |  | true |  |  | from OMDb; number of votes on IMDB |
+| resolution | varchar(10) |  | true |  |  | video resolution |
+| video_codec | varchar(10) |  | true |  |  | video compression codec |
+| upload_type | varchar(10) |  | true |  |  | uploading type indicating source of upload |
+| audio_codec | varchar(10) |  | true |  |  | audio codec |
+| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp for initial database creation of item |
+| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp of last database alteration of item |
 
 ## Constraints
 

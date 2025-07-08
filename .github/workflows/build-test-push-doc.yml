@@ -12,7 +12,7 @@ env:
   IMAGE_NAME: ${{ github.repository_owner }}/wst-flyway
 
 jobs:
-  build-test-push:
+  build-test-push-doc:
     runs-on: ubuntu-latest
     permissions:
       contents: write

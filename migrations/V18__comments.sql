@@ -82,7 +82,7 @@ COMMENT ON COLUMN training.tmdb_id IS 'from TMDB; identifier for themoviedb.org 
 COMMENT ON COLUMN training.label IS 'training label enum value for model ingestion';
 -- flag columns
 COMMENT ON COLUMN training.human_labeled IS 'flag value that indicates a user change of the label value';
-COMMENT ON COLUMN training.confirmed IS 'deterines if training label has been confirmed as accurate';
+COMMENT ON COLUMN training.reviewed IS 'deterines if training label has been confirmed as accurate';
 COMMENT ON COLUMN training.anomalous IS 'user set flag for media items frequently appear as false postives or false negatvies in model results, but have been verified to be correct';
 -- media identifying information
 COMMENT ON COLUMN training.media_type IS 'either movie, tv_shows, or tv_season';

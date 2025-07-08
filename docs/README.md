@@ -8,6 +8,9 @@
 | [atp.media](atp.media.md) | 45 | stores media data for movies, tv shows, and tv seasons | BASE TABLE |
 | [atp.training](atp.training.md) | 32 | stores training data to be ingested by reel-driver | BASE TABLE |
 | [atp.prediction](atp.prediction.md) | 5 | stores training data to be ingested by reel-driver | BASE TABLE |
+| [atp.engineered](atp.engineered.md) | 21 |  | BASE TABLE |
+| [atp.engineered_normalization_table](atp.engineered_normalization_table.md) | 3 |  | BASE TABLE |
+| [atp.engineered_schema](atp.engineered_schema.md) | 2 |  | BASE TABLE |
 
 ## Stored procedures and functions
 

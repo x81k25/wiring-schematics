@@ -68,6 +68,12 @@ stores training data to be ingested by reel-driver
 | training_tmdb_id_key | CREATE UNIQUE INDEX training_tmdb_id_key ON atp.training USING btree (tmdb_id) |
 | idx_training_tmdb_id | CREATE INDEX idx_training_tmdb_id ON atp.training USING btree (tmdb_id) |
 
+## Triggers
+
+| Name | Definition |
+| ---- | ---------- |
+| trg_training_update_timestamp | CREATE TRIGGER trg_training_update_timestamp BEFORE UPDATE ON atp.training FOR EACH ROW EXECUTE FUNCTION atp.trg_fn_training_update_timestamp() |
+
 ## Relations
 
 ![er](atp.training.svg)

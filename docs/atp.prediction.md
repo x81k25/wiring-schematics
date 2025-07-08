@@ -28,6 +28,12 @@ stores training data to be ingested by reel-driver
 | ---- | ---------- |
 | prediction_pkey | CREATE UNIQUE INDEX prediction_pkey ON atp.prediction USING btree (imdb_id) |
 
+## Triggers
+
+| Name | Definition |
+| ---- | ---------- |
+| trg_prediction_update_timestamp | CREATE TRIGGER trg_prediction_update_timestamp BEFORE UPDATE ON atp.prediction FOR EACH ROW EXECUTE FUNCTION atp.trg_fn_prediction_update_timestamp() |
+
 ## Relations
 
 ![er](atp.prediction.svg)

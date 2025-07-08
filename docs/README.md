@@ -9,6 +9,17 @@
 | [atp.training](atp.training.md) | 32 | stores training data to be ingested by reel-driver | BASE TABLE |
 | [atp.prediction](atp.prediction.md) | 5 | stores training data to be ingested by reel-driver | BASE TABLE |
 
+## Stored procedures and functions
+
+| Name | ReturnType | Arguments | Type |
+| ---- | ------- | ------- | ---- |
+| atp.update_updated_at_column | trigger |  | FUNCTION |
+| atp.reset_on_ingestion | trigger |  | FUNCTION |
+| atp.reset_error_condition | trigger |  | FUNCTION |
+| atp.reset_rejection_reason | trigger |  | FUNCTION |
+| atp.trg_fn_training_update_timestamp | trigger |  | FUNCTION |
+| atp.trg_fn_prediction_update_timestamp | trigger |  | FUNCTION |
+
 ## Relations
 
 ![er](schema.svg)

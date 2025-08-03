@@ -11,7 +11,6 @@
 | [atp.engineered](atp.engineered.md) | 21 |  | BASE TABLE |
 | [atp.engineered_normalization_table](atp.engineered_normalization_table.md) | 3 |  | BASE TABLE |
 | [atp.engineered_schema](atp.engineered_schema.md) | 2 |  | BASE TABLE |
-| [atp.movies](atp.movies.md) | 36 | Combined view of training and prediction data joined by imdb_id | VIEW |
 
 ## Stored procedures and functions
 

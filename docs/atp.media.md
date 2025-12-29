@@ -53,6 +53,7 @@ stores media data for movies, tv shows, and tv seasons
 | audio_codec | varchar(10) |  | true |  |  | audio codec |
 | created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp for initial database creation of item |
 | updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  | timestamp of last database alteration of item |
+| deleted_at | timestamp with time zone |  | true |  |  | Soft delete timestamp. NULL = active, timestamp = deleted. |
 
 ## Constraints
 
@@ -90,6 +91,7 @@ stores media data for movies, tv shows, and tv seasons
 | reset_fields_on_ingestion | CREATE TRIGGER reset_fields_on_ingestion BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_on_ingestion() |
 | clear_error_condition | CREATE TRIGGER clear_error_condition BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_error_condition() |
 | clear_rejection_reason | CREATE TRIGGER clear_rejection_reason BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_rejection_reason() |
+| trg_media_soft_delete | CREATE TRIGGER trg_media_soft_delete BEFORE UPDATE ON atp.media FOR EACH ROW WHEN ((old.deleted_at IS DISTINCT FROM new.deleted_at)) EXECUTE FUNCTION atp.set_rejection_on_soft_delete() |
 
 ## Relations
 

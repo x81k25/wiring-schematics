@@ -5,7 +5,7 @@
 | Name | Columns | Comment | Type |
 | ---- | ------- | ------- | ---- |
 | [public.flyway_schema_history](public.flyway_schema_history.md) | 10 |  | BASE TABLE |
-| [atp.media](atp.media.md) | 45 | stores media data for movies, tv shows, and tv seasons | BASE TABLE |
+| [atp.media](atp.media.md) | 46 | stores media data for movies, tv shows, and tv seasons | BASE TABLE |
 | [atp.training](atp.training.md) | 32 | stores training data to be ingested by reel-driver | BASE TABLE |
 | [atp.prediction](atp.prediction.md) | 5 | stores training data to be ingested by reel-driver | BASE TABLE |
 | [atp.engineered](atp.engineered.md) | 21 |  | BASE TABLE |
@@ -23,6 +23,7 @@
 | atp.reset_rejection_reason | trigger |  | FUNCTION |
 | atp.trg_fn_training_update_timestamp | trigger |  | FUNCTION |
 | atp.trg_fn_prediction_update_timestamp | trigger |  | FUNCTION |
+| atp.set_rejection_on_soft_delete | trigger |  | FUNCTION |
 
 ## Relations
 

@@ -27,6 +27,7 @@
 | genre | smallint[] |  | true |  |  |  |
 | created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | true |  |  |  |
 | updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | true |  |  |  |
+| production_companies | smallint[] |  | true |  |  | One-hot encoded production company indices for ML feature engineering |
 
 ## Constraints
 

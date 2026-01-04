@@ -28,25 +28,6 @@ stores media data for movies, tv shows, and tv seasons
 | uploader | varchar(25) |  | true |  |  | uploading entity of the media item |
 | imdb_id | varchar(10) |  | true |  |  | from TMDB; IMDB identifier for media item |
 | tmdb_id | integer |  | true |  |  | from TMDB; identifier for themoviedb.org API |
-| budget | bigint |  | true |  |  | from TMDB; production budget of media item |
-| revenue | bigint |  | true |  |  | from TMDB; current revenue of media item |
-| runtime | integer |  | true |  |  | from TMDB; runtime in minutes of media item |
-| origin_country | character(2)[] |  | true |  |  | from TMDB; primary country of production in iso_3166_1 format |
-| production_companies | varchar(255)[] |  | true |  |  | from TMDB; array of production companies |
-| production_countries | character(2)[] |  | true |  |  | from TMDB; array of countries where media item was produced in iso_3166_1 format |
-| production_status | varchar(25) |  | true |  |  | from TMDB; current production status of media item |
-| original_language | character(2) |  | true |  |  | from TMDB; primary language of media item in ISO 639 format |
-| spoken_languages | character(2)[] |  | true |  |  | from TMDB; array of languages available encoded in ISO 639 format |
-| genre | varchar(20)[] |  | true |  |  | from TMDB; array of genres associated with the movie |
-| original_media_title | varchar(255) |  | true |  |  | from TMDB; original title of media item |
-| tagline | varchar(255) |  | true |  |  | from TMDB; tagline for the media item |
-| overview | text |  | true |  |  | from TMDB; brief plot synopsis of media item |
-| tmdb_rating | numeric(5,3) |  | true |  |  | from TMDB; rating submitted by TMDB users out of 10 |
-| tmdb_votes | integer |  | true |  |  | from TMDB; number of ratings by TMDB users |
-| rt_score | integer |  | true |  |  | from OMDb; Rotten Tomatoes score out of 100 |
-| metascore | integer |  | true |  |  | from OMDb; MetaCritic score out of 100 |
-| imdb_rating | numeric(4,1) |  | true |  |  | from OMDb; IMDB rating out of 100 |
-| imdb_votes | integer |  | true |  |  | from OMDb; number of votes on IMDB |
 | resolution | varchar(10) |  | true |  |  | video resolution |
 | video_codec | varchar(10) |  | true |  |  | video compression codec |
 | upload_type | varchar(10) |  | true |  |  | uploading type indicating source of upload |
@@ -59,19 +40,10 @@ stores media data for movies, tv shows, and tv seasons
 
 | Name | Type | Definition |
 | ---- | ---- | ---------- |
-| media_budget_check | CHECK | CHECK ((budget >= 0)) |
 | media_hash_check | CHECK | CHECK (((hash ~ '^[a-f0-9]+$'::text) AND (length(hash) = 40))) |
 | media_imdb_id_check | CHECK | CHECK (((imdb_id)::text ~ '^tt[0-9]{7,8}$'::text)) |
-| media_imdb_rating_check | CHECK | CHECK (((imdb_rating IS NULL) OR ((imdb_rating >= (0)::numeric) AND (imdb_rating <= (100)::numeric)))) |
-| media_imdb_votes_check | CHECK | CHECK ((imdb_votes >= 0)) |
-| media_metascore_check | CHECK | CHECK (((metascore IS NULL) OR ((metascore >= 0) AND (metascore <= 100)))) |
 | media_release_year_check | CHECK | CHECK (((release_year >= 1850) AND (release_year <= 2100))) |
-| media_revenue_check | CHECK | CHECK ((revenue >= 0)) |
-| media_rt_score_check | CHECK | CHECK (((rt_score IS NULL) OR ((rt_score >= 0) AND (rt_score <= 100)))) |
-| media_runtime_check | CHECK | CHECK ((runtime >= 0)) |
 | media_tmdb_id_check | CHECK | CHECK ((tmdb_id > 0)) |
-| media_tmdb_rating_check | CHECK | CHECK (((tmdb_rating >= (0)::numeric) AND (tmdb_rating <= (10)::numeric))) |
-| media_tmdb_votes_check | CHECK | CHECK ((tmdb_votes >= 0)) |
 | media_pkey | PRIMARY KEY | PRIMARY KEY (hash) |
 
 ## Indexes

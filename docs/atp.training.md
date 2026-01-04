@@ -10,7 +10,7 @@ stores training data to be ingested by reel-driver
 | ---- | ---- | ------- | -------- | -------- | ------- | ------- |
 | imdb_id | varchar(10) |  | false |  |  | from TMDB; IMDB identifier for media item, and the primary key for this column |
 | tmdb_id | integer |  | true |  |  | from TMDB; identifier for themoviedb.org API |
-| label | atp.label_type |  | false |  |  | training label enum value for model ingestion |
+| label | atp.label_type |  | true |  |  | training label enum value for model ingestion |
 | human_labeled | boolean | false | false |  |  | flag value that indicates a user change of the label value |
 | anomalous | boolean | false | false |  |  | user set flag for media items frequently appear as false postives or false negatvies in model results, but have been verified to be correct |
 | media_type | atp.media_type |  | false |  |  | either movie, tv_shows, or tv_season |

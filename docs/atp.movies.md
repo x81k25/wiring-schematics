@@ -97,8 +97,8 @@ CREATE VIEW movies AS (
 
 | Name | Columns | Comment | Type |
 | ---- | ------- | ------- | ---- |
-| [atp.training](atp.training.md) | 32 | ML training data with user labels. V30: Added missing constraints to match dev/staging schema. | BASE TABLE |
-| [atp.prediction](atp.prediction.md) | 5 | stores training data to be ingested by reel-driver | BASE TABLE |
+| [atp.training](atp.training.md) | 32 | ML training data with user labels. V31: Standardized timestamp triggers. | BASE TABLE |
+| [atp.prediction](atp.prediction.md) | 5 | ML model outputs with probabilities. V31: Standardized timestamp triggers. | BASE TABLE |
 
 ## Relations
 

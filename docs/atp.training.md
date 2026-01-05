@@ -2,7 +2,7 @@
 
 ## Description
 
-stores training data to be ingested by reel-driver
+ML training data with user labels. V30: Added missing constraints to match dev/staging schema.
 
 ## Columns
 

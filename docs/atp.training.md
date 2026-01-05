@@ -2,7 +2,7 @@
 
 ## Description
 
-ML training data with user labels. V30: Added missing constraints to match dev/staging schema.
+ML training data with user labels. V31: Standardized timestamp triggers.
 
 ## Columns
 
@@ -72,7 +72,7 @@ ML training data with user labels. V30: Added missing constraints to match dev/s
 
 | Name | Definition |
 | ---- | ---------- |
-| trg_training_update_timestamp | CREATE TRIGGER trg_training_update_timestamp BEFORE UPDATE ON atp.training FOR EACH ROW EXECUTE FUNCTION atp.trg_fn_training_update_timestamp() |
+| trg_training_update_timestamp | CREATE TRIGGER trg_training_update_timestamp BEFORE UPDATE ON atp.training FOR EACH ROW EXECUTE FUNCTION atp.set_updated_at() |
 
 ## Relations
 

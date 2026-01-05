@@ -2,6 +2,8 @@
 
 ## Description
 
+Preprocessed ML features. V31: Standardized timestamp triggers.
+
 ## Columns
 
 | Name | Type | Default | Nullable | Children | Parents | Comment |
@@ -25,8 +27,8 @@
 | production_countries | smallint[] |  | true |  |  |  |
 | spoken_languages | smallint[] |  | true |  |  |  |
 | genre | smallint[] |  | true |  |  |  |
-| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | true |  |  |  |
-| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | true |  |  |  |
+| created_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
+| updated_at | timestamp with time zone | (CURRENT_TIMESTAMP AT TIME ZONE 'UTC'::text) | false |  |  |  |
 | production_companies | smallint[] |  | true |  |  | One-hot encoded production company indices for ML feature engineering |
 | anomalous | boolean | false | false |  |  | flag for media items that frequently appear as false positives or false negatives in model results, but have been verified to be correct |
 
@@ -41,6 +43,12 @@
 | Name | Definition |
 | ---- | ---------- |
 | engineered_pkey | CREATE UNIQUE INDEX engineered_pkey ON atp.engineered USING btree (imdb_id) |
+
+## Triggers
+
+| Name | Definition |
+| ---- | ---------- |
+| trg_engineered_update_timestamp | CREATE TRIGGER trg_engineered_update_timestamp BEFORE UPDATE ON atp.engineered FOR EACH ROW EXECUTE FUNCTION atp.set_updated_at() |
 
 ## Relations
 

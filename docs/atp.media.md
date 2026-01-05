@@ -2,7 +2,7 @@
 
 ## Description
 
-stores media data for movies, tv shows, and tv seasons
+Main pipeline data for movies/TV shows. V31: Standardized timestamp triggers.
 
 ## Columns
 
@@ -59,11 +59,11 @@ stores media data for movies, tv shows, and tv seasons
 
 | Name | Definition |
 | ---- | ---------- |
-| update_media_updated_at | CREATE TRIGGER update_media_updated_at BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.update_updated_at_column() |
 | reset_fields_on_ingestion | CREATE TRIGGER reset_fields_on_ingestion BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_on_ingestion() |
 | clear_error_condition | CREATE TRIGGER clear_error_condition BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_error_condition() |
 | clear_rejection_reason | CREATE TRIGGER clear_rejection_reason BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.reset_rejection_reason() |
 | trg_media_soft_delete | CREATE TRIGGER trg_media_soft_delete BEFORE UPDATE ON atp.media FOR EACH ROW WHEN ((old.deleted_at IS DISTINCT FROM new.deleted_at)) EXECUTE FUNCTION atp.set_rejection_on_soft_delete() |
+| update_media_updated_at | CREATE TRIGGER update_media_updated_at BEFORE UPDATE ON atp.media FOR EACH ROW EXECUTE FUNCTION atp.set_updated_at() |
 
 ## Relations
 

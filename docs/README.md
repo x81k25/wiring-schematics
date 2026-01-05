@@ -6,7 +6,7 @@
 | ---- | ------- | ------- | ---- |
 | [public.flyway_schema_history](public.flyway_schema_history.md) | 10 |  | BASE TABLE |
 | [atp.media](atp.media.md) | 27 | stores media data for movies, tv shows, and tv seasons | BASE TABLE |
-| [atp.training](atp.training.md) | 32 | stores training data to be ingested by reel-driver | BASE TABLE |
+| [atp.training](atp.training.md) | 32 | ML training data with user labels. V30: Added missing constraints to match dev/staging schema. | BASE TABLE |
 | [atp.prediction](atp.prediction.md) | 5 | stores training data to be ingested by reel-driver | BASE TABLE |
 | [atp.engineered](atp.engineered.md) | 23 |  | BASE TABLE |
 | [atp.engineered_normalization_table](atp.engineered_normalization_table.md) | 3 |  | BASE TABLE |

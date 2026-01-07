@@ -27,5 +27,5 @@ docker run --rm \
   -e FLYWAY_PASSWORD="${FLYWAY_PGSQL_PASSWORD}" \
   -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
   -v "$(pwd)/migrations:/flyway/sql:ro" \
-  flyway/flyway:11.10.0-alpine \
+  flyway/flyway:11.20.0-alpine \
   "$@"

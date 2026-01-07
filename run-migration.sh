@@ -25,7 +25,7 @@ docker run --rm \
   -e FLYWAY_URL="jdbc:postgresql://${FLYWAY_PGSQL_HOST}:${FLYWAY_PGSQL_PORT}/${FLYWAY_PGSQL_DATABASE}" \
   -e FLYWAY_USER="${FLYWAY_PGSQL_USERNAME}" \
   -e FLYWAY_PASSWORD="${FLYWAY_PGSQL_PASSWORD}" \
-  -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
-  -v "$(pwd)/migrations:/flyway/sql:ro" \
-  flyway/flyway:11.10.0-alpine \
+  -e FLYWAY_LOCATIONS="filesystem:/flyway/migrations" \
+  -v "$(pwd)/migrations:/flyway/migrations:ro" \
+  flyway/flyway:11.20.0-alpine \
   "$@"

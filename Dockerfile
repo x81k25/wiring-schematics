@@ -2,7 +2,7 @@
 FROM flyway/flyway:11.20.0-alpine
 
 # Copy migrations
-COPY migrations /flyway/sql/
+COPY migrations /flyway/migrations/
 
 # Default command
 CMD ["info"]

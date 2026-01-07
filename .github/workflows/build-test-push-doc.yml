@@ -70,8 +70,8 @@ jobs:
             -e FLYWAY_URL="jdbc:postgresql://postgres:5432/test_db" \
             -e FLYWAY_USER="postgres" \
             -e FLYWAY_PASSWORD="postgres" \
-            -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
-            -v "${{ github.workspace }}/migrations:/flyway/sql:ro" \
+            -e FLYWAY_LOCATIONS="filesystem:/flyway/migrations" \
+            -v "${{ github.workspace }}/migrations:/flyway/migrations:ro" \
             flyway-migrations:test \
             migrate
 
@@ -82,8 +82,8 @@ jobs:
             -e FLYWAY_URL="jdbc:postgresql://postgres:5432/test_db" \
             -e FLYWAY_USER="postgres" \
             -e FLYWAY_PASSWORD="postgres" \
-            -e FLYWAY_LOCATIONS="filesystem:/flyway/sql" \
-            -v "${{ github.workspace }}/migrations:/flyway/sql:ro" \
+            -e FLYWAY_LOCATIONS="filesystem:/flyway/migrations" \
+            -v "${{ github.workspace }}/migrations:/flyway/migrations:ro" \
             flyway-migrations:test \
             validate
 

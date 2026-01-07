@@ -2,11 +2,56 @@
 
 ## Overview
 
-This repository manages database schema migrations for PostgreSQL using Flyway. It provides version-controlled, repeatable database changes across all environments.
+This repository manages database schema migrations for PostgreSQL using Flyway. It provides version-controlled, repeatable database changes across all environments (dev, stg, prod).
+
+## Migration Workflow
+
+```mermaid
+flowchart TB
+    subgraph DEV["Local Development"]
+        A[Write migration SQL] --> B[Place in migrations/]
+        B --> C[Test locally]
+        C --> D{Tests pass?}
+        D -->|No| A
+        D -->|Yes| E[Git push to dev]
+    end
+
+    subgraph CI["GitHub Actions"]
+        E --> F[Checkout code]
+        F --> G[Build Docker image]
+        G --> H[Start test PostgreSQL]
+        H --> I[Run flyway migrate]
+        I --> J[Run flyway validate]
+        J --> K{Tests pass?}
+        K -->|No| L[Build fails]
+        K -->|Yes| M[Push image to ghcr.io]
+        M --> N[Generate docs with tbls]
+    end
+
+    subgraph CD["ArgoCD Deployment"]
+        M --> O[Image Updater detects new image]
+        O --> P[Updates k8s-manifests repo]
+        P --> Q[ArgoCD syncs deployment]
+        Q --> R[Pod restarts]
+    end
+
+    subgraph K8S["Kubernetes Pod"]
+        R --> S[Init container starts]
+        S --> T[flyway migrate runs]
+        T --> U{Migrations succeed?}
+        U -->|Yes| V[Main container starts]
+        U -->|No| W[Pod fails - check logs]
+        V --> X[Pod running]
+    end
+
+    subgraph DB["PostgreSQL"]
+        T --> Y[(Apply migrations)]
+        Y --> Z[Update flyway_schema_history]
+    end
+```
 
 ## Quick Start
 
-### Recommended Approach (Docker)
 ```bash
 # Check migration status
 ./run-migration.sh info
@@ -18,43 +63,21 @@ This repository manages database schema migrations for PostgreSQL using Flyway. 
 ./run-migration.sh validate
 ```
 
-### Legacy Approach (requires local Flyway)
-```bash
-# Install dependencies
-npm install
-
-# Check migration status
-npm run migrate:info
-
-# Run pending migrations
-npm run migrate
-
-# Validate migrations
-npm run migrate:validate
-```
-
 ## Project Structure
 
 ```
 .
-├── migrations/              # SQL migration files
-│   ├── V1__Drop_test_schemas.sql
-│   ├── V2__Create_users_table.sql
-│   ├── V3__Drop_users_table.sql
-│   ├── V4__Create_test_database.sql
-│   └── V5__Create_products_table.sql
+├── migrations/              # SQL migration files (V1__, V2__, etc.)
+├── docs/                    # Auto-generated schema documentation
 ├── .github/
 │   └── workflows/
-│       └── docker-build.yml # CI/CD pipeline
-├── flyway/                  # Flyway command-line tools
-├── flyway.conf.js          # Flyway configuration (legacy)
-├── run-migration.sh        # Migration runner script
-├── k8s-example.yaml        # Kubernetes deployment example
-├── Dockerfile              # Docker image for Flyway
-├── docker-compose.yml      # Docker Compose configuration
-├── package.json            # Node.js dependencies and scripts
-├── .env                    # Database connection (not in git)
-└── .gitignore             # Git ignore patterns
+│       └── build-test-push-doc.yml  # CI/CD pipeline
+├── run-migration.sh         # Migration runner script (Docker-based)
+├── Dockerfile               # Flyway Docker image
+├── docker-compose.yml       # Local Docker Compose config
+├── .tbls.yml                # Schema documentation config
+├── .env                     # Dev database connection (not in git)
+└── .gitignore
 ```
 
 ## Configuration
@@ -64,25 +87,16 @@ npm run migrate:validate
 Create a `.env` file with your PostgreSQL connection details:
 
 ```
-FLYWAY_PGSQL_HOST=your-db-host
-FLYWAY_PGSQL_PORT=5432
+FLYWAY_PGSQL_HOST=192.168.50.2
+FLYWAY_PGSQL_PORT=31434
 FLYWAY_PGSQL_DATABASE=postgres
 FLYWAY_PGSQL_USERNAME=your-username
 FLYWAY_PGSQL_PASSWORD=your-password
 ```
 
-### Flyway Settings
-
-Configuration is managed in `flyway.conf.js`:
-- Connects to the `postgres` database by default
-- Migration files stored in `migrations/` directory
-- Schema history tracked in `flyway_schema_history` table
-
 ## Migration Files
 
 ### Naming Convention
-
-Migration files must follow Flyway's naming pattern:
 
 ```
 V{version}__{description}.sql
@@ -91,7 +105,7 @@ V{version}__{description}.sql
 Examples:
 - `V1__Initial_schema.sql`
 - `V2__Add_user_tables.sql`
-- `V2.1__Add_user_indexes.sql`
+- `V2.1__Add_user_indexes.sql` (out-of-order migration)
 - `V3__Update_permissions.sql`
 
 ### Writing Migrations
@@ -108,7 +122,7 @@ CREATE TABLE users (
     id SERIAL PRIMARY KEY,
     username VARCHAR(50) NOT NULL UNIQUE,
     email VARCHAR(255) NOT NULL,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+    created_at TIMESTAMP WITH TIME ZONE DEFAULT (CURRENT_TIMESTAMP AT TIME ZONE 'UTC')
 );
 
 CREATE INDEX idx_users_email ON users(email);
@@ -116,179 +130,108 @@ CREATE INDEX idx_users_email ON users(email);
 
 ## Available Commands
 
-### Migration Script (Recommended)
 | Command | Description |
 |---------|-------------|
 | `./run-migration.sh info` | Show migration status and history |
 | `./run-migration.sh migrate` | Apply pending migrations |
 | `./run-migration.sh validate` | Validate applied migrations |
 
-### Legacy npm Scripts
-| Command | Description |
-|---------|-------------|
-| `npm run migrate` | Apply pending migrations |
-| `npm run migrate:info` | Show migration status and history |
-| `npm run migrate:validate` | Validate applied migrations |
-| `npm run migrate:baseline` | Set baseline for existing database |
-| `npm run migrate:repair` | Repair migration history table |
-| `npm run migrate:clean` | **DANGER**: Drop all database objects |
-
 ## Development Workflow
 
 1. **Create Migration**: Add new SQL file to `migrations/`
-2. **Check Status**: Run `./run-migration.sh info`
-3. **Test Locally**: Apply with `./run-migration.sh migrate`
-4. **Validate**: Run `./run-migration.sh validate`
-5. **Commit**: Push migration file to version control
-6. **CI/CD**: GitHub Actions will automatically test and build Docker images
+2. **Test Locally**: Run `./run-migration.sh migrate` against dev database
+3. **Validate**: Run `./run-migration.sh validate`
+4. **Push to dev**: Git push triggers CI/CD pipeline
+5. **Monitor CI**: Check GitHub Actions for build status
+6. **Verify Deployment**: Check pod logs in Kubernetes
+
+## Deployment Architecture
+
+### Environments
+
+| Environment | Git Branch | Image Tag | Database |
+|-------------|------------|-----------|----------|
+| Development | dev | `:dev` | dev-postgres (31434) |
+| Staging | stg | `:stg` | stg-postgres (31433) |
+| Production | main | `:main` | prod-postgres (31432) |
+
+### Kubernetes Deployment
+
+The Flyway container runs as an **init container** pattern:
+
+1. **Init Container** (`wst-flyway-migrate`): Runs `flyway migrate` on pod startup
+2. **Main Container** (`wst-flyway-main`): Keeps pod alive for logging/troubleshooting
+
+Migrations are triggered automatically when:
+- New Docker image is pushed (ArgoCD Image Updater detects it)
+- Pod is manually restarted: `kubectl rollout restart deployment/wst-flyway-{env} -n pgsql`
+
+### Checking Deployment Status
+
+```bash
+# Find flyway pods
+kubectl get pods -n pgsql | grep flyway
+
+# Check migration logs
+kubectl logs -n pgsql wst-flyway-dev-<pod-hash> -c wst-flyway-migrate
+
+# Check flyway history table
+PGPASSWORD=<password> psql -h 192.168.50.2 -p 31434 -U <user> -d postgres \
+  -c "SELECT version, description, installed_on FROM flyway_schema_history ORDER BY installed_rank DESC LIMIT 5;"
+```
 
 ## Best Practices
 
 ### DO
 - Keep migrations small and focused
 - Use descriptive migration names
-- Test migrations in development first
-- Include both schema and data changes in logical groups
-- Use transactions where appropriate
-- Add helpful comments in complex migrations
+- Test migrations in dev first
+- Use `IF EXISTS` / `IF NOT EXISTS` for idempotency
+- Add comments to tables and columns
+- Follow UTC timestamp conventions
 
 ### DON'T
-- Modify existing migration files
+- Modify existing migration files (checksums will fail)
 - Skip version numbers
-- Use timestamps in version numbers
 - Include environment-specific data
 - Make assumptions about existing data
+- Run `migrate:clean` in production
 
 ## Troubleshooting
 
 ### Migration Failed
 
 If a migration fails:
-1. Fix the issue in your database manually if needed
-2. Run `npm run migrate:repair` to clean up
-3. Fix the migration file
-4. Run `npm run migrate` again
+1. Check pod logs: `kubectl logs -n pgsql <pod> -c wst-flyway-migrate`
+2. Fix the issue in your database manually if needed
+3. Use `./run-migration.sh repair` to clean up failed entries
+4. Fix the migration file (if not yet applied elsewhere)
+5. Push fix and restart pod
+
+### Checksum Mismatch
+
+If you see checksum validation errors:
+- Someone modified an already-applied migration file
+- Use `./run-migration.sh repair` to update checksums (use with caution)
 
 ### Out of Order Migrations
 
-Flyway requires migrations to be applied in order. If you need to add an earlier migration:
-1. Use a decimal version (e.g., `V2.1__Missing_table.sql`)
-2. Or renumber subsequent migrations (requires `migrate:clean`)
+Use decimal versions for migrations that need to be inserted between existing ones:
+- Existing: `V2__`, `V3__`
+- New: `V2.1__` (will run after V2 but before V3)
 
-### Validation Errors
-
-Run `npm run migrate:validate` to check for:
-- Modified migration files
-- Missing migrations
-- Checksum mismatches
-
-## Environment Management
-
-### Development
-- Use personal database or schema
-- Test all migrations locally
-- Clean and rebuild as needed
-
-### Staging/Production
-- Apply migrations through CI/CD
-- Never modify schema manually
-- Always backup before major changes
-
-## Security
-
-- Never commit `.env` files
-- Use environment variables in CI/CD
-- Restrict production database access
-- Review migrations for SQL injection risks
-
-## Docker Support
-
-### Building the Image
-
-```bash
-docker build -t flyway-migrations .
-```
-
-### Running with Docker
-
-```bash
-# Check migration status
-docker run --rm --env-file .env flyway-migrations
-
-# Run migrations
-docker run --rm --env-file .env flyway-migrations npm run migrate
-
-# Validate migrations
-docker run --rm --env-file .env flyway-migrations npm run migrate:validate
-```
-
-### Using Docker Compose
-
-```bash
-# Check migration status
-docker-compose run --rm flyway info
-
-# Run migrations
-docker-compose run --rm flyway migrate
-
-# Validate migrations
-docker-compose run --rm flyway validate
-```
-
-## CI/CD Integration
-
-### GitHub Actions
-
-The repository includes a GitHub Actions workflow that:
-- Builds Docker images on push to `dev` branch
-- Builds on pull requests to `stg` and `main` branches
-- Tags images with SHA versioning (e.g., `dev-20250701-abc123`)
-- Tests migrations against a temporary PostgreSQL container
-- Pushes images to GitHub Container Registry (ghcr.io)
-
-### Docker Image
+## Docker Images
 
 Pre-built images are available at:
 ```
 ghcr.io/x81k25/wst-flyway:dev
-ghcr.io/x81k25/wst-flyway:main
 ghcr.io/x81k25/wst-flyway:stg
-ghcr.io/x81k25/wst-flyway:<commit-sha>
+ghcr.io/x81k25/wst-flyway:main
+ghcr.io/x81k25/wst-flyway:sha-<commit>
 ```
-
-## Kubernetes Deployment
-
-### Using the Migration Script
-
-The `run-migration.sh` script supports both local (.env file) and Kubernetes (environment variables) deployments:
-
-```bash
-# With .env file (local development)
-./run-migration.sh info
-
-# With environment variables (Kubernetes)
-export FLYWAY_PGSQL_HOST=postgres-service
-export FLYWAY_PGSQL_PORT=5432
-export FLYWAY_PGSQL_DATABASE=mydb
-export FLYWAY_PGSQL_USERNAME=user
-export FLYWAY_PGSQL_PASSWORD=pass
-./run-migration.sh migrate
-```
-
-### Kubernetes Example
-
-See `k8s-example.yaml` for a complete example using:
-- ConfigMap for database connection settings
-- Secret for credentials
-- Job for running migrations
 
 ## Additional Resources
 
-- [Flyway Documentation](https://flywaydb.org/documentation/)
+- [Flyway Documentation](https://documentation.red-gate.com/flyway)
 - [PostgreSQL Documentation](https://www.postgresql.org/docs/)
-- [SQL Migration Best Practices](https://flywaydb.org/documentation/bestpractices)
-- [GitHub Container Registry](https://docs.github.com/en/packages/working-with-a-github-packages-registry/working-with-the-container-registry)
-
-## License
-
-[Your License Here]
+- [Schema Documentation](./docs/README.md) (auto-generated)

@@ -1,0 +1,52 @@
+stages:
+  - test
+  - build
+
+variables:
+  POSTGRES_DB: test_db
+  POSTGRES_USER: postgres
+  POSTGRES_PASSWORD: postgres
+
+test-migrations:
+  stage: test
+  tags:
+    - k8s
+    - docker
+  image: flyway/flyway:11.20.0-alpine
+  services:
+    - name: postgres:17-alpine
+      alias: postgres
+  variables:
+    FLYWAY_URL: "jdbc:postgresql://postgres:5432/test_db"
+    FLYWAY_USER: "postgres"
+    FLYWAY_PASSWORD: "postgres"
+    FLYWAY_LOCATIONS: "filesystem:/flyway/migrations"
+  before_script:
+    - cp -r migrations /flyway/migrations
+  script:
+    - flyway migrate
+    - flyway validate
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+
+build:
+  stage: build
+  tags:
+    - k8s
+    - docker
+  needs:
+    - test-migrations
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  before_script:
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+      --destination "${CI_REGISTRY_IMAGE}:sha-${CI_COMMIT_SHORT_SHA}"
+  rules:
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/

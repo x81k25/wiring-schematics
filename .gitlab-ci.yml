@@ -1,12 +1,20 @@
+workflow:
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+
 stages:
   - test
   - build
+  - deploy-test
 
 variables:
   POSTGRES_DB: test_db
   POSTGRES_USER: postgres
   POSTGRES_PASSWORD: postgres
 
+# Test stage - runs on MR only
+# Validates migrations against ephemeral PostgreSQL
 test-migrations:
   stage: test
   tags:
@@ -27,15 +35,14 @@ test-migrations:
     - flyway migrate
     - flyway validate
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
+# Build stage - runs on push to dev/stg/main
 build:
   stage: build
   tags:
     - k8s
     - docker
-  needs:
-    - test-migrations
   image:
     name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
@@ -50,3 +57,92 @@ build:
       --destination "${CI_REGISTRY_IMAGE}:sha-${CI_COMMIT_SHORT_SHA}"
   rules:
     - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+
+# Deploy-test template - validates Flyway migration applied successfully
+.deploy-test:
+  stage: deploy-test
+  tags:
+    - k8s
+    - docker
+  image: alpine/k8s:1.28.3
+  needs:
+    - build
+  before_script:
+    - apk add --no-cache bash
+  script:
+    - echo "Getting expected version from migrations..."
+    - |
+      EXPECTED=$(ls migrations/V*.sql 2>/dev/null | sort -V | tail -1 | sed 's/.*V\([0-9.]*\)__.*/\1/')
+      if [ -z "$EXPECTED" ]; then
+        echo "No migration files found"
+        exit 1
+      fi
+      echo "Expected version: $EXPECTED"
+
+    - echo "Restarting Flyway deployment to apply migrations..."
+    - kubectl rollout restart deployment/${FLYWAY_DEPLOYMENT} -n pgsql
+
+    - echo "Waiting for Flyway deployment to complete..."
+    - kubectl rollout status deployment/${FLYWAY_DEPLOYMENT} -n pgsql --timeout=180s
+
+    - echo "Waiting for migration to apply..."
+    - sleep 30
+
+    - echo "Querying flyway_schema_history for actual version..."
+    - |
+      ACTUAL=$(kubectl exec -n pgsql ${POSTGRES_POD} -- \
+        psql -U ${DB_USER} -d postgres -t -c \
+        "SELECT version FROM atp.flyway_schema_history ORDER BY installed_rank DESC LIMIT 1" | tr -d ' ')
+
+      echo "Actual version in database: $ACTUAL"
+
+      if [ "$EXPECTED" != "$ACTUAL" ]; then
+        echo "Migration version mismatch: expected $EXPECTED, got $ACTUAL"
+        exit 1
+      fi
+
+    - echo "Checking migration success flag..."
+    - |
+      SUCCESS=$(kubectl exec -n pgsql ${POSTGRES_POD} -- \
+        psql -U ${DB_USER} -d postgres -t -c \
+        "SELECT success FROM atp.flyway_schema_history ORDER BY installed_rank DESC LIMIT 1" | tr -d ' ')
+
+      if [ "$SUCCESS" != "t" ]; then
+        echo "Latest migration did not succeed (success=$SUCCESS)"
+        exit 1
+      fi
+
+    - echo "Flyway migration validated successfully!"
+
+# Deploy-test for dev
+deploy-test-dev:
+  extends: .deploy-test
+  resource_group: wiring-schematics-dev
+  variables:
+    FLYWAY_DEPLOYMENT: "wst-flyway-dev"
+    POSTGRES_POD: "dev-postgres-0"
+    DB_USER: "x81-test"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "dev"
+
+# Deploy-test for stg
+deploy-test-stg:
+  extends: .deploy-test
+  resource_group: wiring-schematics-stg
+  variables:
+    FLYWAY_DEPLOYMENT: "wst-flyway-stg"
+    POSTGRES_POD: "stg-postgres-0"
+    DB_USER: "x81-stg"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "stg"
+
+# Deploy-test for prod
+deploy-test-prod:
+  extends: .deploy-test
+  resource_group: wiring-schematics-prod
+  variables:
+    FLYWAY_DEPLOYMENT: "wst-flyway-prod"
+    POSTGRES_POD: "prod-postgres-0"
+    DB_USER: "x81k25"
+  rules:
+    - if: $CI_COMMIT_BRANCH == "main"

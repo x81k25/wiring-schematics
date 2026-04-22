@@ -1,7 +1,7 @@
 workflow:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
-    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|main)$/
 
 stages:
   - test
@@ -37,7 +37,7 @@ test-migrations:
   rules:
     - if: $CI_PIPELINE_SOURCE == "merge_request_event"
 
-# Build stage - runs on push to dev/stg/main
+# Build stage - runs on push to dev/main
 build:
   stage: build
   tags:
@@ -56,7 +56,7 @@ build:
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
       --destination "${CI_REGISTRY_IMAGE}:sha-${CI_COMMIT_SHORT_SHA}"
   rules:
-    - if: $CI_COMMIT_BRANCH =~ /^(dev|stg|main)$/
+    - if: $CI_COMMIT_BRANCH =~ /^(dev|main)$/
 
 # Deploy-test template - validates Flyway migration applied successfully
 .deploy-test:
@@ -124,17 +124,6 @@ deploy-test-dev:
     DB_USER: "x81-test"
   rules:
     - if: $CI_COMMIT_BRANCH == "dev"
-
-# Deploy-test for stg
-deploy-test-stg:
-  extends: .deploy-test
-  resource_group: wiring-schematics-stg
-  variables:
-    FLYWAY_DEPLOYMENT: "wst-flyway-stg"
-    POSTGRES_POD: "stg-postgres-0"
-    DB_USER: "x81-stg"
-  rules:
-    - if: $CI_COMMIT_BRANCH == "stg"
 
 # Deploy-test for prod
 deploy-test-prod:

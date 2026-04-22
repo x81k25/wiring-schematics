@@ -2,7 +2,7 @@
 
 ## Overview
 
-This repository manages database schema migrations for PostgreSQL using Flyway. It provides version-controlled, repeatable database changes across all environments (dev, stg, prod).
+This repository manages database schema migrations for PostgreSQL using Flyway. It provides version-controlled, repeatable database changes across all environments (dev, prod).
 
 ## Migration Workflow
 
@@ -152,7 +152,6 @@ CREATE INDEX idx_users_email ON users(email);
 | Environment | Git Branch | Image Tag | Database |
 |-------------|------------|-----------|----------|
 | Development | dev | `:dev` | dev-postgres (31434) |
-| Staging | stg | `:stg` | stg-postgres (31433) |
 | Production | main | `:main` | prod-postgres (31432) |
 
 ### Kubernetes Deployment
@@ -225,7 +224,6 @@ Use decimal versions for migrations that need to be inserted between existing on
 Pre-built images are available at:
 ```
 ghcr.io/x81k25/wst-flyway:dev
-ghcr.io/x81k25/wst-flyway:stg
 ghcr.io/x81k25/wst-flyway:main
 ghcr.io/x81k25/wst-flyway:sha-<commit>
 ```
